@@ -1,0 +1,280 @@
+#include <iostream>
+#include <iomanip>
+#include <cmath>
+#include <string>
+#include <cstdlib>
+#include <ctime>
+using namespace std;
+
+// ------------------------------------------------------------
+// STRUCT DEFINITIONS
+// ------------------------------------------------------------
+struct Object {
+    int id;
+    double x, y;
+    double distance;
+    string direction;
+    string riskLevel;
+};
+
+struct Plane {
+    double x, y;
+    string name;
+};
+
+// ------------------------------------------------------------
+// GLOBAL VARIABLES
+// ------------------------------------------------------------
+const int MAX_OBJECTS = 100;
+Object radarLog[MAX_OBJECTS];
+int logCount = 0;
+
+// ------------------------------------------------------------
+// FUNCTION DECLARATIONS
+// ------------------------------------------------------------
+void displayTitle();
+void mainMenu(Plane &plane);
+void scanObjects(Plane &plane);
+void showRadarLog();
+void clearRadarLog();
+double calculateDistance(double x1, double y1, double x2, double y2);
+string detectDirection(double dx, double dy);
+string assessRisk(double distance);
+void displayObjectReport(const Object &obj);
+void generateReportSummary();
+
+// ------------------------------------------------------------
+// HELPER FUNCTIONS
+// ------------------------------------------------------------
+
+// Display system title
+void displayTitle() {
+    cout << "==============================================\n";
+    cout << "          AEROPLANE RADAR SYSTEM v1.0         \n";
+    cout << "==============================================\n";
+}
+
+// Calculate distance between airplane and an object
+double calculateDistance(double x1, double y1, double x2, double y2) {
+    return sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2));
+}
+
+// Determine direction based on coordinate differences
+string detectDirection(double dx, double dy) {
+    if (dx > 0 && dy > 0) return "NORTH-EAST";
+    else if (dx < 0 && dy > 0) return "NORTH-WEST";
+    else if (dx > 0 && dy < 0) return "SOUTH-EAST";
+    else if (dx < 0 && dy < 0) return "SOUTH-WEST";
+    else if (dx == 0 && dy > 0) return "NORTH";
+    else if (dx == 0 && dy < 0) return "SOUTH";
+    else if (dx > 0 && dy == 0) return "EAST";
+    else if (dx < 0 && dy == 0) return "WEST";
+    else return "SAME LOCATION";
+}
+
+// Assess risk based on distance
+string assessRisk(double distance) {
+    if (distance < 5)
+        return "HIGH RISK";
+    else if (distance < 15)
+        return "MEDIUM RISK";
+    else
+        return "LOW RISK";
+}
+
+// ------------------------------------------------------------
+// MAIN MENU
+// ------------------------------------------------------------
+void mainMenu(Plane &plane) {
+    int choice;
+    do {
+        cout << "\n================ MAIN MENU ================\n";
+        cout << "1. Scan for Nearby Objects\n";
+        cout << "2. View Radar Log\n";
+        cout << "3. Clear Radar Log\n";
+        cout << "4. Generate Summary Report\n";
+        cout << "5. Exit System\n";
+        cout << "===========================================\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch (choice) {
+        case 1:
+            scanObjects(plane);
+            break;
+        case 2:
+            showRadarLog();
+            break;
+        case 3:
+            clearRadarLog();
+            break;
+        case 4:
+            generateReportSummary();
+            break;
+        case 5:
+            cout << "\nExiting radar system... Goodbye!\n";
+            break;
+        default:
+            cout << "Invalid choice! Please try again.\n";
+        }
+    } while (choice != 5);
+}
+
+// ------------------------------------------------------------
+// SCAN OBJECTS FUNCTION
+// ------------------------------------------------------------
+void scanObjects(Plane &plane) {
+    int n;
+    cout << "\nEnter number of objects to scan (1-" << MAX_OBJECTS << "): ";
+    cin >> n;
+
+    if (n <= 0 || n > MAX_OBJECTS) {
+        cout << "Invalid number of objects.\n";
+        return;
+    }
+
+    srand(time(0)); // random coordinates for simulation
+
+    for (int i = 0; i < n; i++) {
+        Object obj;
+        obj.id = logCount + 1;
+        obj.x = rand() % 100; // random position
+        obj.y = rand() % 100;
+
+        double dx = obj.x - plane.x;
+        double dy = obj.y - plane.y;
+
+        obj.distance = calculateDistance(plane.x, plane.y, obj.x, obj.y);
+        obj.direction = detectDirection(dx, dy);
+        obj.riskLevel = assessRisk(obj.distance);
+
+        radarLog[logCount++] = obj;
+
+        cout << "\nObject " << obj.id << " detected!\n";
+        displayObjectReport(obj);
+    }
+}
+
+// ------------------------------------------------------------
+// DISPLAY SINGLE OBJECT REPORT
+// ------------------------------------------------------------
+void displayObjectReport(const Object &obj) {
+    cout << "----------------------------------------------\n";
+    cout << "Object ID      : " << obj.id << "\n";
+    cout << "Coordinates    : (" << obj.x << ", " << obj.y << ")\n";
+    cout << "Distance       : " << fixed << setprecision(2) << obj.distance << " units\n";
+    cout << "Direction      : " << obj.direction << "\n";
+    cout << "Risk Level     : " << obj.riskLevel << "\n";
+    cout << "----------------------------------------------\n";
+
+    if (obj.riskLevel == "HIGH RISK") {
+        cout << " ALERT! Immediate action required!\n";
+    } else if (obj.riskLevel == "MEDIUM RISK") {
+        cout << " Caution! Maintain safe distance.\n";
+    } else {
+        cout << " Object at safe distance.\n";
+    }
+}
+
+// ------------------------------------------------------------
+// SHOW RADAR LOG
+// ------------------------------------------------------------
+void showRadarLog() {
+    if (logCount == 0) {
+        cout << "\nNo radar data available.\n";
+        return;
+    }
+
+    cout << "\n================ RADAR LOG ================\n";
+    cout << left << setw(10) << "ID"
+         << setw(12) << "X"
+         << setw(12) << "Y"
+         << setw(15) << "Distance"
+         << setw(15) << "Direction"
+         << setw(12) << "Risk" << endl;
+
+    cout << "----------------------------------------------\n";
+
+    for (int i = 0; i < logCount; i++) {
+        cout << left << setw(10) << radarLog[i].id
+             << setw(12) << radarLog[i].x
+             << setw(12) << radarLog[i].y
+             << setw(15) << fixed << setprecision(2) << radarLog[i].distance
+             << setw(15) << radarLog[i].direction
+             << setw(12) << radarLog[i].riskLevel << endl;
+    }
+
+    cout << "----------------------------------------------\n";
+    cout << "Total detections: " << logCount << endl;
+}
+
+// ------------------------------------------------------------
+// CLEAR RADAR LOG
+// ------------------------------------------------------------
+void clearRadarLog() {
+    logCount = 0;
+    cout << "\nRadar log cleared successfully.\n";
+}
+
+// ------------------------------------------------------------
+// GENERATE SUMMARY REPORT
+// ------------------------------------------------------------
+void generateReportSummary() {
+    if (logCount == 0) {
+        cout << "\nNo data to summarize.\n";
+        return;
+    }
+
+    int highRisk = 0, mediumRisk = 0, lowRisk = 0;
+    double totalDistance = 0.0;
+
+    for (int i = 0; i < logCount; i++) {
+        totalDistance += radarLog[i].distance;
+        if (radarLog[i].riskLevel == "HIGH RISK")
+            highRisk++;
+        else if (radarLog[i].riskLevel == "MEDIUM RISK")
+            mediumRisk++;
+        else
+            lowRisk++;
+    }
+
+    double avgDistance = totalDistance / logCount;
+
+    cout << "\n================ SUMMARY REPORT ================\n";
+    cout << "Total Objects Scanned   : " << logCount << endl;
+    cout << "Average Distance (units): " << fixed << setprecision(2) << avgDistance << endl;
+    cout << "High Risk Objects       : " << highRisk << endl;
+    cout << "Medium Risk Objects     : " << mediumRisk << endl;
+    cout << "Low Risk Objects        : " << lowRisk << endl;
+
+    cout << "\nOverall Safety Status: ";
+    if (highRisk > 0)
+        cout << " DANGER! Immediate attention required.\n";
+    else if (mediumRisk > 0)
+        cout << " Caution advised.\n";
+    else
+        cout << " All clear. Safe flight!\n";
+
+    cout << "=================================================\n";
+}
+
+// ------------------------------------------------------------
+// MAIN FUNCTION
+// ------------------------------------------------------------
+int main() {
+    Plane plane;
+    displayTitle();
+
+    cout << "Enter airplane name: ";
+    cin >> plane.name;
+
+    cout << "Enter airplane coordinates (x y): ";
+    cin >> plane.x >> plane.y;
+
+    cout << "\nWelcome, Captain of " << plane.name << "!\n";
+    cout << "Your current position is (" << plane.x << ", " << plane.y << ").\n";
+
+    mainMenu(plane);
+
+    return 0;
+}
