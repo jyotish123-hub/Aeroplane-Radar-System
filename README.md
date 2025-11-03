@@ -52,7 +52,7 @@ Platform: Console Application
 
 
 
-Names: Neeraj Kr Sarma, Jyotish Borgohain,Nahar Kalita,Abinas Kalita,Luit Talukdar and MD.Nizamul Haque
+Names: Neeraj Kr Sarma, Jyotish Borgohain,Nahar Kalita,Luit Talukdar and MD.Nizamul Haque
 College:Assam down town University 
 Course: BCA (IBM)
 Year: 2025-28
